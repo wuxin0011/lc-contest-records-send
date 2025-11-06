@@ -12,9 +12,13 @@ const emailConfig = {
   host: 'smtp.qq.com',
   port: 465,
   secure: true, // 使用SSL
+  // auth: {
+  //   user: process.env.QQ_EMAIL, // 从环境变量读取
+  //   pass: process.env.QQ_EMAIL_AUTH_CODE // 从环境变量读取
+  // }
   auth: {
-    user: process.env.QQ_EMAIL, // 从环境变量读取
-    pass: process.env.QQ_EMAIL_AUTH_CODE // 从环境变量读取
+    user: 2191377759, // 从环境变量读取
+    pass: "vtqtxrtosmwudjhf" // 从环境变量读取
   }
 };
 
