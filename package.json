@@ -4,7 +4,7 @@
     "description": "LeetCode周赛报告邮件发送",
     "main": "./send-email.js",
     "scripts": {
-      "dev": "node ./send-email.js"
+      "dev": "node ./send-email.js -1"
     },
     "dependencies": {
       "nodemailer": "^6.9.7"
