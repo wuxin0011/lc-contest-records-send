@@ -1,4 +1,4 @@
-name: Node.js邮件发送测试
+name: 力扣周赛情况测试
 
 on:
   workflow_dispatch:

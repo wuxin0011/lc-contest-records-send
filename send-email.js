@@ -1,16 +1,14 @@
 // send-email.js
 const nodemailer = require('nodemailer');
-
-
+let user_pages = [],list = [],infos = [];
+let isWeek = true;
+let contestNo = 454;
+let isLast = true
 // console.log('process.env.QQ_EMAIL',process.env.QQ_EMAIL != undefined)
 // console.log('process.env.QQ_EMAIL_AUTH_CODE',process.env.QQ_EMAIL_AUTH_CODE != undefined)
-console.log(process.env)
+// console.log(process.env)
 
-if(!(process.env.QQ_EMAIL != undefined && process.env.QQ_EMAIL_AUTH_CODE != undefined)){
-  console.error("获取不到邮箱和验证码")
-  process.exit(-1)
-  return;
-}
+
 
 // 查询的用户集合
 const queryUserNames = new Set([
@@ -74,16 +72,14 @@ async function contestHistory(pageNum = 1,pageSize = 10) {
 }
 
 
-let isWeek = true;
-let contestNo = 454;
 
 (async function () {
   let index = 0
   let pageNum = 1
   let pageSize = 10
   // 最近周赛 如果是-1 表示最近一次周赛  -2 表示倒数第二场周赛
-  if(process.argv.length == 3 && Number(process.argv[2])<0) {
-     let x = Number(process.argv[2])
+  if(isLast) {
+     let x = -1
      index = -(x + 1)
      pageNum = Math.floor(index / pageSize) + pageNum;
      index %= pageSize
@@ -96,17 +92,12 @@ let contestNo = 454;
   // }
   if(index<0||index>=contests.length)index = 0;
   let maxId = contests[0]['title'].match(/\d+/)[0]
-  if(process.argv.length != 4) {
-      contestNo = contests[index]['title'].match(/\d+/)[0]
-      isWeek = contests[index]['title'].indexOf('双') == -1
-  }else{
-    isWeek = (process.argv[2] == "1" ||  process.argv[2] == 'True' ||  process.argv[2] == 'true' || process.argv[2] == 'yes')
-    contestNo = Number(process.argv[3]) > maxId ? Number(process.argv[3]) : maxId
-  }
+  contestNo = contests[index]['title'].match(/\d+/)[0]
+  isWeek = contests[index]['title'].indexOf('双') == -1
   console.log("\x1b[36m\x1b[1m\x1b[4m%s\x1b[0m", `\n第 ${contestNo} 场${isWeek ? '':"双"}周赛信息如下🏆\n`);
 })();
 
-const user_pages = [],list = [];
+
 
 (async function () {
   if(is_stop)return
@@ -201,7 +192,7 @@ const user_pages = [],list = [];
   console.log("\x1b[36m\x1b[1m\x1b[4m%s\x1b[0m", "排名页详细");
   console.table(user_pages);
 })();
-let infos = [];
+
 
 (async function () {
   // 周赛
@@ -271,7 +262,7 @@ let infos = [];
       用户名: username,
       排名: res["rank"] ?? 1000000,
       分数: Math.ceil(res["score"]) ?? 0,
-      旧分数: Math.ceil(res["old_rating"]) ?? 0,
+      旧分数: isNaN(Math.ceil(res["old_rating"])) ? '-':Math.ceil(res["old_rating"]) ?? 0,
       新分数: Math.ceil(res["new_rating"]) ?? 0,
       分数差: Math.ceil(res["delta_rating"]) ?? 0,
     };
@@ -316,6 +307,8 @@ let infos = [];
     "新分数",
     "分数差",
   ]);
+
+  sendEmail()
 })();
 
 
@@ -735,6 +728,11 @@ function HTML(){
 
 
 async function sendEmail() {
+  if(!(process.env.QQ_EMAIL != undefined && process.env.QQ_EMAIL_AUTH_CODE != undefined)){
+    console.error("获取不到邮箱和验证码")
+    process.exit(-1)
+    return;
+  }
   await sleep(10000)
   buildSolutionInfo_1 = buildSolutionInfo()
   buildInfos_1 = buildInfos()
@@ -784,6 +782,3 @@ async function sendEmail() {
     process.exit(1);
   }
 }
-
-// 运行发送函数
-sendEmail();
