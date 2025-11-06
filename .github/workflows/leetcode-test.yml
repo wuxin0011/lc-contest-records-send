@@ -1,16 +1,29 @@
-name: 基础邮件测试
-on: workflow_dispatch
+name: Node.js邮件发送测试
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'  # 每5分钟测试
 
 jobs:
-  send-test-email:
+  send-emails:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Send email using sendgrid action
-      uses: peaceiris/actions-sendgrid@v1.0.0
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        to: ${{ secrets.QQ_EMAIL }}
-        from: ${{ secrets.QQ_EMAIL }}
-        apikey: ${{ secrets.QQ_EMAIL_AUTH_CODE }}  # 这里需要SendGrid API Key
-        subject: 'SendGrid测试邮件'
-        body: '这是一封通过SendGrid发送的测试邮件'
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Send emails via Node.js
+      env:
+        QQ_EMAIL: ${{ secrets.QQ_EMAIL }}
+        QQ_EMAIL_AUTH_CODE: ${{ secrets.QQ_EMAIL_AUTH_CODE }}
+      run: node send-email.js
