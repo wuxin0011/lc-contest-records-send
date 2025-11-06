@@ -21,7 +21,7 @@ jobs:
         body: |
           这是一封测试邮件！
           
-          发送时间: ${{ fromJSON('["周日","周一","周二","周三","周四","周五","周六"]')[fromJSON(utc().day)] }} ${{ utc().hour }}:${{ utc().minute }} (UTC)
+          发送时间: NONE
           工作流ID: ${{ github.run_id }}
           
           如果收到此邮件，说明GitHub Actions邮件配置成功！
