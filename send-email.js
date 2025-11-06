@@ -174,7 +174,7 @@ async function contestHistory(pageNum = 1,pageSize = 10) {
       id: get_username(user.user_slug),
       rank: user.rank + 1,
       score: user.score,
-      time: cost(user.finish_time - startTime),
+      time: String(cost(user.finish_time - startTime)).replace('336','0'),
     };
     qs.forEach((qid, i) => {
       info[`Q${i + 1}`] = user.submissions[qid]
@@ -365,7 +365,7 @@ let buildSolutionInfo = function() {
               <td>${user.id}</td>
               <td>${user.rank}</td>
               <td>${user.score}</td>
-              <td>${user.time}</td>
+              <td>${String(user.time).replace('336','0')}</td>
               ${q}
           </tr>
         `
