@@ -17,12 +17,7 @@ jobs:
         node-version: '18'
 
     - name: Install dependencies with force
-      run: |
-        # 确保安装依赖到node_modules
-        npm ci --production
-        # 或者使用
-        # npm install --production --no-optional
-
+      run: pnpm i
     - name: Verify installation
       run: |
         echo "检查node_modules目录:"
