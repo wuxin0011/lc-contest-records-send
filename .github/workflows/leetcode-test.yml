@@ -17,10 +17,7 @@ jobs:
         node-version: '18'
 
     - name: Install pnpm
-      run: npm i pnpm
-
-    - name: Install dependencies with force
-      run: pnpm i
+      run: npm i
 
     - name: Send test emails
       env:
