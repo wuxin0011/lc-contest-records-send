@@ -1,26 +1,16 @@
 name: 基础邮件测试
-
-on:
-  workflow_dispatch:  # 只允许手动触发，便于测试
+on: workflow_dispatch
 
 jobs:
   send-test-email:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Send simple test email
-      uses: dawidd6/action-send-mail@v3
+    - name: Send email using sendgrid action
+      uses: peaceiris/actions-sendgrid@v1.0.0
       with:
-        server_address: smtp.qq.com
-        server_port: 465  # 改为SSL端口
-        secure: true      # 启用SSL加密
-        username: ${{ secrets.QQ_EMAIL }}
-        password: ${{ secrets.QQ_EMAIL_AUTH_CODE }}
-        subject: 'GitHub Actions配置测试'
-        to: ${{ secrets.QQ_EMAIL }}  # 使用Secrets中的邮箱地址
-        from: 'Test Bot <${{ secrets.QQ_EMAIL }}>'
-        body: '这是一封配置测试邮件'
-        ignore_cert: true
-
-    - name: Success message
-      run: echo "✅ 测试邮件已发送！"
+        to: ${{ secrets.QQ_EMAIL }}
+        from: ${{ secrets.QQ_EMAIL }}
+        apikey: ${{ secrets.QQ_EMAIL_AUTH_CODE }}  # 这里需要SendGrid API Key
+        subject: 'SendGrid测试邮件'
+        body: '这是一封通过SendGrid发送的测试邮件'
