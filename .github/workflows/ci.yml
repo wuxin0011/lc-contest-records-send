@@ -229,7 +229,6 @@ jobs:
                 <div class="header">
                     <h1>🏆 LeetCode周赛报告</h1>
                     <div class="contest-info" id="contestInfo">第 ${{ env.CONTEST_NO || 'N' }} 场周赛</div>
-                    <div class="timestamp">生成时间: ${{ fromJSON('["周日","周一","周二","周三","周四","周五","周六"]')[fromJSON(utc().day)] }} ${{ utc().hour }}:${{ utc().minute }} (UTC)</div>
                 </div>
                 
                 <div class="stats-grid">
