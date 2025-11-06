@@ -1,5 +1,5 @@
 // send-email.js
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
 // 配置收件人列表
 const recipientList = [
