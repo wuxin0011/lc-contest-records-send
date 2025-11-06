@@ -3,9 +3,9 @@ name: LeetCode周赛报告 with HTML邮件
 on:
   schedule:
     # 正式环境
-    # - cron: '30 12 * * 0'  # 每周日12:30 UTC
+    - cron: '30 12 * * 0'  # 每周日12:30 UTC
     # 测试用
-    - cron: '*/5 * * * *'
+    # - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:

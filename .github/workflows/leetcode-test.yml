@@ -1,0 +1,31 @@
+name: 基础邮件测试
+
+on:
+  workflow_dispatch:  # 只允许手动触发，便于测试
+
+jobs:
+  send-test-email:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Send simple test email
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.qq.com
+        server_port: 587
+        username: ${{ secrets.QQ_EMAIL }}
+        password: ${{ secrets.QQ_EMAIL_AUTH_CODE }}
+        subject: 'GitHub Actions邮件测试'
+        to: ${{ secrets.QQ_EMAIL }}
+        from: '测试机器人 <${{ secrets.QQ_EMAIL }}>'
+        body: |
+          这是一封测试邮件！
+          
+          发送时间: ${{ fromJSON('["周日","周一","周二","周三","周四","周五","周六"]')[fromJSON(utc().day)] }} ${{ utc().hour }}:${{ utc().minute }} (UTC)
+          工作流ID: ${{ github.run_id }}
+          
+          如果收到此邮件，说明GitHub Actions邮件配置成功！
+        ignore_cert: true
+
+    - name: Success message
+      run: echo "✅ 测试邮件已发送！"
