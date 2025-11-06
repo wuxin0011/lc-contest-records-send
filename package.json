@@ -3,10 +3,12 @@
     "version": "1.0.0",
     "description": "LeetCode周赛报告邮件发送",
     "main": "send-email.js",
+    "type": "module",
     "scripts": {
       "send": "node send-email.js"
     },
     "dependencies": {
       "nodemailer": "^6.9.7"
-    }
+    },
+    "packageManager": "pnpm@8.15.0"
   }

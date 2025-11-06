@@ -16,14 +16,11 @@ jobs:
       with:
         node-version: '18'
 
+    - name: Install pnpm
+      run: npm i pnpm
+
     - name: Install dependencies with force
       run: pnpm i
-    - name: Verify installation
-      run: |
-        echo "检查node_modules目录:"
-        ls -la node_modules/ | head -10
-        echo "检查nodemailer:"
-        ls -la node_modules/nodemailer/ || echo "nodemailer未找到"
 
     - name: Send test emails
       env:
