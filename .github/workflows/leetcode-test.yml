@@ -12,11 +12,12 @@ jobs:
       uses: dawidd6/action-send-mail@v3
       with:
         server_address: smtp.qq.com
-        server_port: 587
+        server_port: 465  # 改为SSL端口
+        secure: true      # 启用SSL加密
         username: ${{ secrets.QQ_EMAIL }}
         password: ${{ secrets.QQ_EMAIL_AUTH_CODE }}
         subject: 'GitHub Actions配置测试'
-        to: 'test@example.com'  # 先用一个测试邮箱
+        to: ${{ secrets.QQ_EMAIL }}  # 使用Secrets中的邮箱地址
         from: 'Test Bot <${{ secrets.QQ_EMAIL }}>'
         body: '这是一封配置测试邮件'
         ignore_cert: true
