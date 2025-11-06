@@ -1,17 +1,3 @@
-// send-email.js
-const nodemailer = require('nodemailer');
-let user_pages = [],list = [],infos = [];
-let isWeek = true;
-let contestNo = 454;
-let isLast = true
-let TITLE = ''
-let index = 0
-// console.log('process.env.QQ_EMAIL',process.env.QQ_EMAIL != undefined)
-// console.log('process.env.QQ_EMAIL_AUTH_CODE',process.env.QQ_EMAIL_AUTH_CODE != undefined)
-// console.log(process.env)
-
-
-
 // 查询的用户集合
 const queryUserNames = new Set([
   "agitated-curranfnd",
@@ -37,6 +23,22 @@ const userRealNameMap = {
   "holden_sn": "floor",
   "nervous-kalamvox": "小李飞刀",
 };
+
+
+
+const nodemailer = require('nodemailer');
+let user_pages = [],list = [],infos = [];
+let isWeek = true;
+let contestNo = 454;
+let isLast = true
+let TITLE = ''
+let index = 0
+// console.log('process.env.QQ_EMAIL',process.env.QQ_EMAIL != undefined)
+// console.log('process.env.QQ_EMAIL_AUTH_CODE',process.env.QQ_EMAIL_AUTH_CODE != undefined)
+// console.log(process.env)
+
+
+
 
 const is_stop = false
 let TIME = new Date().toLocaleString()
