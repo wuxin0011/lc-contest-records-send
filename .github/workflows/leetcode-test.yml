@@ -15,16 +15,10 @@ jobs:
         server_port: 587
         username: ${{ secrets.QQ_EMAIL }}
         password: ${{ secrets.QQ_EMAIL_AUTH_CODE }}
-        subject: 'GitHub Actions邮件测试'
-        to: ${{ secrets.QQ_EMAIL }}
-        from: '测试机器人 <${{ secrets.QQ_EMAIL }}>'
-        body: |
-          这是一封测试邮件！
-          
-          发送时间: NONE
-          工作流ID: ${{ github.run_id }}
-          
-          如果收到此邮件，说明GitHub Actions邮件配置成功！
+        subject: 'GitHub Actions配置测试'
+        to: 'test@example.com'  # 先用一个测试邮箱
+        from: 'Test Bot <${{ secrets.QQ_EMAIL }}>'
+        body: '这是一封配置测试邮件'
         ignore_cert: true
 
     - name: Success message
