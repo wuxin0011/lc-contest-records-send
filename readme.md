@@ -33,4 +33,4 @@ const userRealNameMap = {
 
 ### 效果预览
 
-![demo](.github/img/1.jpg)
+![demo](.github/img/demo.jpg)
