@@ -2,8 +2,15 @@
 const nodemailer = require('nodemailer');
 
 
-console.log('process.env.QQ_EMAIL',process.env.QQ_EMAIL != undefined)
-console.log('process.env.QQ_EMAIL_AUTH_CODE',process.env.QQ_EMAIL_AUTH_CODE != undefined)
+// console.log('process.env.QQ_EMAIL',process.env.QQ_EMAIL != undefined)
+// console.log('process.env.QQ_EMAIL_AUTH_CODE',process.env.QQ_EMAIL_AUTH_CODE != undefined)
+console.log(process.env)
+
+if(!(process.env.QQ_EMAIL != undefined && process.env.QQ_EMAIL_AUTH_CODE != undefined)){
+  console.error("获取不到邮箱和验证码")
+  process.exit(-1)
+  return;
+}
 
 // 查询的用户集合
 const queryUserNames = new Set([
