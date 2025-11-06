@@ -8,19 +8,30 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+      # 必须先安装 pnpm 再 setup-node
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false  # 我们稍后会手动安装依赖
 
-    - name: Install pnpm
-      run: npm i
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+          cache-dependency-path: ${{ env.PROJECT_DIR }}/pnpm-lock.yaml
 
-    - name: Send test emails
-      env:
-        QQ_EMAIL: ${{ secrets.QQ_EMAIL }}
-        QQ_EMAIL_AUTH_CODE: ${{ secrets.QQ_EMAIL_AUTH_CODE }}
-      run: node send-email.js
+      - name: Install dependencies
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          pnpm install --frozen-lockfile
+
+      - name: Run update script
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: pnpm dev
