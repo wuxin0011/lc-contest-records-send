@@ -2,6 +2,8 @@
 const nodemailer = require('nodemailer');
 
 
+console.log('process.env.QQ_EMAIL',process.env.QQ_EMAIL != undefined)
+console.log('process.env.QQ_EMAIL_AUTH_CODE',process.env.QQ_EMAIL_AUTH_CODE != undefined)
 
 // 查询的用户集合
 const queryUserNames = new Set([
