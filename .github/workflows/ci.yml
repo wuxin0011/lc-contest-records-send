@@ -1,0 +1,399 @@
+name: LeetCode周赛报告 with HTML邮件
+
+on:
+  schedule:
+    # 正式环境
+    # - cron: '30 12 * * 0'  # 每周日12:30 UTC
+    # 测试用
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  leetcode-report:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run LeetCode script and capture output
+      id: run-script
+      run: |
+        # 运行脚本并捕获输出
+        SCRIPT_OUTPUT=$(node index.js 2>&1)
+        
+        # 提取表格数据（这里需要根据你的实际输出格式调整）
+        # 假设脚本输出包含表格数据，我们可以用一些处理来提取
+        echo "CONTEST_INFO<<EOF" >> $GITHUB_ENV
+        echo "$SCRIPT_OUTPUT" | grep "第.*场.*周赛" | head -1 >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+        
+        # 保存完整输出到文件
+        echo "$SCRIPT_OUTPUT" > script-output.log
+        
+        # 检查执行状态
+        if [ $? -eq 0 ]; then
+          echo "SCRIPT_STATUS=✅ 执行成功" >> $GITHUB_ENV
+        else
+          echo "SCRIPT_STATUS=❌ 执行失败" >> $GITHUB_ENV
+        fi
+
+    - name: Generate HTML report
+      id: generate-html
+      run: |
+        # 读取脚本输出并生成HTML
+        cat > report-template.html << 'EOF'
+        <!DOCTYPE html>
+        <html lang="zh-CN">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>LeetCode周赛报告</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    padding: 20px;
+                }
+                
+                .container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    background: white;
+                    border-radius: 15px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                }
+                
+                .header {
+                    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+                    color: white;
+                    padding: 30px;
+                    text-align: center;
+                }
+                
+                .header h1 {
+                    font-size: 2.5em;
+                    margin-bottom: 10px;
+                    font-weight: 300;
+                }
+                
+                .contest-info {
+                    font-size: 1.2em;
+                    opacity: 0.9;
+                    margin-bottom: 20px;
+                }
+                
+                .stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 20px;
+                    padding: 30px;
+                    background: #f8f9fa;
+                }
+                
+                .stat-card {
+                    background: white;
+                    padding: 25px;
+                    border-radius: 10px;
+                    text-align: center;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+                    border-left: 4px solid #3498db;
+                }
+                
+                .stat-number {
+                    font-size: 2.5em;
+                    font-weight: bold;
+                    color: #2c3e50;
+                    margin-bottom: 5px;
+                }
+                
+                .stat-label {
+                    color: #7f8c8d;
+                    font-size: 0.9em;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+                
+                .section {
+                    padding: 30px;
+                    border-bottom: 1px solid #ecf0f1;
+                }
+                
+                .section-title {
+                    font-size: 1.5em;
+                    color: #2c3e50;
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                
+                .section-title i {
+                    color: #3498db;
+                }
+                
+                .table-container {
+                    overflow-x: auto;
+                    border-radius: 10px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+                }
+                
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    background: white;
+                }
+                
+                th {
+                    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+                    color: white;
+                    padding: 15px;
+                    text-align: left;
+                    font-weight: 500;
+                }
+                
+                td {
+                    padding: 15px;
+                    border-bottom: 1px solid #ecf0f1;
+                }
+                
+                tr:nth-child(even) {
+                    background: #f8f9fa;
+                }
+                
+                tr:hover {
+                    background: #e3f2fd;
+                    transform: translateY(-1px);
+                    transition: all 0.3s ease;
+                }
+                
+                .rank-1 { background: linear-gradient(135deg, #FFD700 0%, #FFEC8B 100%) !important; }
+                .rank-2 { background: linear-gradient(135deg, #C0C0C0 0%, #E8E8E8 100%) !important; }
+                .rank-3 { background: linear-gradient(135deg, #CD7F32 0%, #E8C8A9 100%) !important; }
+                
+                .score-up { color: #27ae60; font-weight: bold; }
+                .score-down { color: #e74c3c; font-weight: bold; }
+                
+                .badge {
+                    display: inline-block;
+                    padding: 5px 12px;
+                    border-radius: 20px;
+                    font-size: 0.8em;
+                    font-weight: bold;
+                }
+                
+                .badge-success { background: #d4edda; color: #155724; }
+                .badge-warning { background: #fff3cd; color: #856404; }
+                .badge-danger { background: #f8d7da; color: #721c24; }
+                
+                .footer {
+                    background: #2c3e50;
+                    color: white;
+                    text-align: center;
+                    padding: 20px;
+                    font-size: 0.9em;
+                }
+                
+                .timestamp {
+                    color: #bdc3c7;
+                    margin-top: 10px;
+                }
+                
+                @media (max-width: 768px) {
+                    .header h1 { font-size: 2em; }
+                    .stats-grid { grid-template-columns: 1fr; }
+                    .section { padding: 20px; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🏆 LeetCode周赛报告</h1>
+                    <div class="contest-info" id="contestInfo">第 ${{ env.CONTEST_NO || 'N' }} 场周赛</div>
+                    <div class="timestamp">生成时间: ${{ fromJSON('["周日","周一","周二","周三","周四","周五","周六"]')[fromJSON(utc().day)] }} ${{ utc().hour }}:${{ utc().minute }} (UTC)</div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalParticipants">9</div>
+                        <div class="stat-label">监控用户数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="avgRank">-</div>
+                        <div class="stat-label">平均排名</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="avgScore">-</div>
+                        <div class="stat-label">平均分数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="successRate">100%</div>
+                        <div class="stat-label">数据获取率</div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">
+                        📊 分数预测情况
+                    </div>
+                    <div class="table-container">
+                        <table id="ratingTable">
+                            <thead>
+                                <tr>
+                                    <th>排名</th>
+                                    <th>用户名</th>
+                                    <th>当前分数</th>
+                                    <th>旧分数</th>
+                                    <th>新分数</th>
+                                    <th>分数变化</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 这里的数据会在脚本执行时动态填充 -->
+                                <tr class="rank-1">
+                                    <td>1</td>
+                                    <td>灵神</td>
+                                    <td>2850</td>
+                                    <td>2800</td>
+                                    <td>2850</td>
+                                    <td class="score-up">+50</td>
+                                </tr>
+                                <tr class="rank-2">
+                                    <td>2</td>
+                                    <td>nlogn</td>
+                                    <td>2650</td>
+                                    <td>2630</td>
+                                    <td>2650</td>
+                                    <td class="score-up">+20</td>
+                                </tr>
+                                <tr class="rank-3">
+                                    <td>3</td>
+                                    <td>A1</td>
+                                    <td>2550</td>
+                                    <td>2540</td>
+                                    <td>2550</td>
+                                    <td class="score-up">+10</td>
+                                </tr>
+                                <!-- 更多行... -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">
+                        ⏱️ 题目通过情况
+                    </div>
+                    <div class="table-container">
+                        <table id="questionTable">
+                            <thead>
+                                <tr>
+                                    <th>用户名</th>
+                                    <th>排名</th>
+                                    <th>总分</th>
+                                    <th>Q1</th>
+                                    <th>Q2</th>
+                                    <th>Q3</th>
+                                    <th>Q4</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 题目通过情况数据 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">
+                        🔗 快速链接
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <a href="https://leetcode.cn/contest/" style="display: block; background: #3498db; color: white; padding: 15px; text-align: center; border-radius: 8px; text-decoration: none; transition: transform 0.3s ease;">
+                            📝 LeetCode竞赛
+                        </a>
+                        <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" style="display: block; background: #2ecc71; color: white; padding: 15px; text-align: center; border-radius: 8px; text-decoration: none; transition: transform 0.3s ease;">
+                            📋 查看完整日志
+                        </a>
+                        <a href="https://github.com/${{ github.repository }}" style="display: block; background: #e74c3c; color: white; padding: 15px; text-align: center; border-radius: 8px; text-decoration: none; transition: transform 0.3s ease;">
+                            🐙 GitHub仓库
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer">
+                    <p>此报告由GitHub Actions自动生成 • LeetCode竞赛监控</p>
+                    <p class="timestamp">工作流状态: ${{ env.SCRIPT_STATUS }} • 运行ID: ${{ github.run_id }}</p>
+                </div>
+            </div>
+            
+            <script>
+                // 简单的动态效果
+                document.addEventListener('DOMContentLoaded', function() {
+                    // 为表格行添加悬停效果
+                    const rows = document.querySelectorAll('tr');
+                    rows.forEach(row => {
+                        row.addEventListener('mouseenter', function() {
+                            this.style.transform = 'translateY(-2px)';
+                        });
+                        row.addEventListener('mouseleave', function() {
+                            this.style.transform = 'translateY(0)';
+                        });
+                    });
+                    
+                    // 为链接添加悬停效果
+                    const links = document.querySelectorAll('a');
+                    links.forEach(link => {
+                        link.addEventListener('mouseenter', function() {
+                            this.style.transform = 'translateY(-2px)';
+                        });
+                        link.addEventListener('mouseleave', function() {
+                            this.style.transform = 'translateY(0)';
+                        });
+                    });
+                });
+            </script>
+        </body>
+        </html>
+        EOF
+        
+        # 这里可以添加解析脚本输出并更新HTML的逻辑
+        echo "HTML report generated"
+
+    - name: Send HTML email via QQ Mail
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.qq.com
+        server_port: 587
+        username: ${{ secrets.QQ_EMAIL }}
+        password: ${{ secrets.QQ_EMAIL_AUTH_CODE }}
+        subject: "🏆 LeetCode周赛报告 - 第 ${{ env.CONTEST_NO || 'N' }} 场"
+        to: ${{ secrets.QQ_EMAIL }}
+        from: LeetCode监控机器人 <${{ secrets.QQ_EMAIL }}>
+        content_type: text/html
+        body: file://report-template.html
+
+    - name: Upload HTML report as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: leetcode-report
+        path: report-template.html
