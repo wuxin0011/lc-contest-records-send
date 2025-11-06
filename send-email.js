@@ -140,7 +140,9 @@ async function contestHistory(pageNum = 1,pageSize = 10) {
   for (const data of datas) {
     for (const user of data.total_rank) {
       if (queryUserNames.has(user.user_slug)) {
-        list.push(summary(user));
+        let temp_info = await summary(user)
+        console.log(temp_info)
+        list.push(temp_info);
         if (!user_map.has(user.user_slug)) {
           user_pages.push({
             username: get_username(user.user_slug),
@@ -168,7 +170,7 @@ async function contestHistory(pageNum = 1,pageSize = 10) {
     );
   }
 
-  function summary(user) {
+  async function summary(user) {
     // console.log(user)
     const info = {
       id: get_username(user.user_slug),
@@ -176,6 +178,7 @@ async function contestHistory(pageNum = 1,pageSize = 10) {
       score: user.score,
       time: String(cost(user.finish_time - startTime)).replace('336','0'),
     };
+    await sleep(500)
     qs.forEach((qid, i) => {
       info[`Q${i + 1}`] = user.submissions[qid]
         ? cost(user.submissions[qid].date - startTime)
