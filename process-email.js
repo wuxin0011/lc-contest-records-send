@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
     const { subject, body, from } = req.body;
 
     // 调用主要的处理函数
-    const result = await axios.post(`${process.env.VERCEL_URL}/api/handle-email`, {
+    const result = await axios.post(`${process.env.VERCEL_URL}/handle-email`, {
       emailContent: `${subject} ${body}`,
       sender: from,
       command: extractCommand(`${subject} ${body}`)
