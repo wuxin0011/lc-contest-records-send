@@ -2,8 +2,6 @@ name: Node.js邮件发送测试
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'  # 每5分钟测试
 
 jobs:
   send-emails:
@@ -17,12 +15,22 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
 
-    - name: Install dependencies
-      run: npm install
+    - name: Install dependencies with force
+      run: |
+        # 确保安装依赖到node_modules
+        npm ci --production
+        # 或者使用
+        # npm install --production --no-optional
 
-    - name: Send emails via Node.js
+    - name: Verify installation
+      run: |
+        echo "检查node_modules目录:"
+        ls -la node_modules/ | head -10
+        echo "检查nodemailer:"
+        ls -la node_modules/nodemailer/ || echo "nodemailer未找到"
+
+    - name: Send test emails
       env:
         QQ_EMAIL: ${{ secrets.QQ_EMAIL }}
         QQ_EMAIL_AUTH_CODE: ${{ secrets.QQ_EMAIL_AUTH_CODE }}
