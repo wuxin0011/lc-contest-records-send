@@ -1,5 +1,6 @@
 ## 力扣周赛分数预测推送
 
+### 自定义
 
 [修改关注用户](./send-email.js)
 
@@ -28,3 +29,8 @@ const userRealNameMap = {
 `QQ_EMAIL` 邮箱
 
 `QQ_EMAIL_AUTH_CODE` 邮箱有效访问密码
+
+
+### 效果预览
+
+![demo](.github/img/1.jpg)
