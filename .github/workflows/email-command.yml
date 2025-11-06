@@ -1,0 +1,44 @@
+name: Execute Email Command
+
+on:
+  repository_dispatch:
+    types: [email-command]
+
+jobs:
+  process-command:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Process command
+        env:
+          COMMAND: ${{ github.event.client_payload.command }}
+          SENDER: ${{ github.event.client_payload.from }}
+        run: |
+          echo "📨 收到邮件命令"
+          echo "发件人: $SENDER"
+          echo "命令: $COMMAND"
+
+          # 解析命令参数
+          if [[ "$COMMAND" =~ @lc\ (-?[0-9]+)\ (-?[0-9]+) ]]; then
+            num1=${BASH_REMATCH[1]}
+            num2=${BASH_REMATCH[2]}
+            
+            echo "🔍 解析到参数: $num1 和 $num2"
+            
+            # 在这里执行你的具体操作
+            # 例如：运行脚本、更新文件、触发部署等
+            
+            # 示例：计算两个数字的和
+            result=$((num1 + num2))
+            echo "📊 计算结果: $num1 + $num2 = $result"
+          else
+            echo "❌ 命令格式无效"
+            exit 1
+          fi
+
+      - name: Send notification
+        if: success()
+        run: |
+          echo "✅ 命令执行成功: ${{ github.event.client_payload.command }}"

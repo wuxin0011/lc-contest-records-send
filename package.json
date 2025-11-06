@@ -1,12 +1,14 @@
 {
-    "name": "leetcode-email-sender",
-    "version": "1.0.0",
-    "description": "LeetCode周赛报告邮件发送",
-    "main": "./send-email.js",
-    "scripts": {
-      "dev": "node ./send-email.js -1"
-    },
-    "dependencies": {
-      "nodemailer": "^6.9.7"
-    }
+  "name": "leetcode-email-sender",
+  "version": "1.0.0",
+  "description": "LeetCode周赛报告邮件发送",
+  "main": "./send-email.js",
+  "scripts": {
+    "dev": "node ./send-email.js -1"
+  },
+  "dependencies": {
+    "@vercel/node": "^5.5.4",
+    "axios": "^1.13.2",
+    "nodemailer": "^6.9.7"
   }
+}
