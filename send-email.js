@@ -5,7 +5,7 @@ const queryUserNames = new Set([
   "holden_sn",
   "sleepy-neumannc4b",
   "li-wei-ming",
-  "silly-heisenberg8lk",
+  "qitongwei",
   "yiren-0429",
   "zhangshize",
   "nervous-kalamvox",
@@ -17,7 +17,7 @@ const userRealNameMap = {
   "agitated-curranfnd": "nlogn",
   "sleepy-neumannc4b": "A1",
   "yiren-0429": "伊人",
-  "silly-heisenberg8lk": "小小",
+  "qitongwei": "祁同伟",
   "li-wei-ming": "李伟民",
   "zhangshize": "喜乐",
   "holden_sn": "floor",
@@ -759,7 +759,7 @@ async function start() {
       await sleep(20);
       let record = await queryRating(user);
       let userContestRanking = Math.ceil(
-        record.data.userContestRanking["rating"]
+        record?.data?.userContestRanking && record.data.userContestRanking["rating"] ? record.data.userContestRanking["rating"] : 0
       );
       let userContestRankingHistory = record.data.userContestRankingHistory;
       if (info["旧分数"] <= 10 || info["旧分数"] == "-") {
