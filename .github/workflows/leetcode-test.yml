@@ -48,4 +48,5 @@ jobs:
           # Node.js 环境变量
           NODE_ENV: 'production'
         run: |
-          pnpm dev
+          pnpm wx
+          pnpm qq
