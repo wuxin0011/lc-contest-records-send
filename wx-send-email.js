@@ -9,19 +9,31 @@ const queryUserNames = new Set([
   "yiren-0429",
   "zhangshize",
   "nervous-kalamvox",
+  "fei-xiang-nk",
+  "aoyama_nanami",
+  "naughty-galoiszyh",
+  "hhczc",
+  "yang-le",
+  "FQWRZEnOha",
 ]);
 
 // 备注
 const userRealNameMap = {
-  endlesscheng: "灵神",
+  "endlesscheng": "灵神",
   "agitated-curranfnd": "nlogn",
-  "sleepy-neumannc4b": "A1",
+  "fei-xiang-nk": "栖川云浮",
   "yiren-0429": "伊人",
   "qitongwei": "祁同伟",
   "li-wei-ming": "李伟民",
   "zhangshize": "喜乐",
   "holden_sn": "floor",
   "nervous-kalamvox": "飞",
+  "aoyama_nanami": "北大佬",
+  "naughty-galoiszyh": "包子头号粉丝",
+  "hhczc": "lvy010",
+  "yang-le": "qtxzh0125",
+  "FQWRZEnOha": "水",
+  "sleepy-neumannc4b": "SuperStar",
 };
 
 
@@ -86,18 +98,36 @@ async function queryRating(username) {
   }).then((res) => res.json());
 }
 
-async function query(username, weekId) {
-  let url = `https://lccn.lbao.site/api/v1/contest-records/user?contest_name=${weekId}&username=${username}&archived=false`;
-  return fetch(url, {
-    method: "GET",
-    cors: "cors",
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Content-Type": "application/json",
-    },
-  }).then((res) => res.json());
-}
-
+async function query(username, wid) {
+    // let url = `https://lccn.lbao.site/api/v1/contest-records/user?contest_name=${wid}&username=${username}&archived=false`;
+    let url = `https://api.entranthub.com/api/v1/contests/leetcode/contests/${wid}/rankings?limit=25&offset=0&userSlug=${username}`;
+    return fetch(url, {
+      method: "GET",
+      cors: "cors",
+      headers: {
+        "Accept": "*",
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "application/json",
+        "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0",
+        "Referer": "https://entranthub.com/"
+  
+      },
+    }).then
+    ((res) => {
+      let ok = 0
+      for(let status = 200;status <= 210;status++) {
+        if(status == res.status) {
+          ok = 1
+          break
+        }
+      }
+      if(!ok)return []
+      return res.json()
+    })
+     .catch((e)=>{
+      console.log('error',e)
+    });
+  }
 
 async function contestHistory(pageNum = 1, pageSize = 10) {
   let json = { "operationName": "contestHistory", "variables": { "pageNum": pageNum, "pageSize": pageSize }, "query": "query contestHistory($pageNum: Int!, $pageSize: Int) {\n  contestHistory(pageNum: $pageNum, pageSize: $pageSize) {\n    totalNum\n    contests {\n      containsPremium\n      title\n      cardImg\n      titleSlug\n      description\n      startTime\n      duration\n      originStartTime\n      isVirtual\n      company {\n        watermark\n        __typename\n      }\n      isEeExamContest\n      __typename\n    }\n    __typename\n  }\n}\n" }
@@ -119,7 +149,7 @@ let user_pages = [], list = [], infos = [];
 async function start() {
 
   let isWeek = true;
-  let contestNo = 454;
+  let contestNo = 490;
   let isLast = true
   let TITLE = ''
   let index = 0
@@ -668,6 +698,7 @@ async function start() {
     const user_map = new Set();
     let curIndex = 1;
     for (const data of datas) {
+      if(!(data || data?.total_rank)) continue
       for (const user of data.total_rank) {
         if (queryUserNames.has(user.user_slug)) {
           let temp_info = await summary(user)
@@ -729,77 +760,97 @@ async function start() {
 
 
     const inf = 0x3fffffff;
+    await sleep(5000)
 
     for (let user of queryUserNames) {
-      await sleep(50);
-      let res = await query(user, queryWeekID);
-      let username = get_username(user)
-      let empty = {
-        用户名: username,
-        rank: inf,
-        new_rating: 0,
-        delta_rating: 0,
-      };
-      try {
-        res = (Array.isArray(res) && res.length > 0 ? res[0] : empty) ?? empty;
-      } catch (e) {
-        // console.error(e)
-        res = empty;
-      }
+        await sleep(50);
+        let res = await query(user, queryWeekID);
+        // console.log(res)
+        if(!res || !res?.items){
+        continue
+        }
+        res = res['items']
+        if(!(Array.isArray(res) && res.length > 0)) {
+        continue;
+        }
+        let username = get_username(user)
+        let empty = {
+            用户名: username,
+            rank: inf,
+            score: 0,
+            oldRating: 0,
+            newRating: 0,
+            deltaRating: 0,
+        };
+        try {
+            res = (Array.isArray(res) && res.length > 0 ? res[0] : empty) ?? empty;
+        } catch (e) {
+            // console.error(e)
+            res = empty;
+        }
 
-      let info = {
-        用户名: username,
-        排名: res["rank"] ?? 1000000,
-        分数: Math.ceil(res["score"]) ?? 0,
-        旧分数: isNaN(Math.ceil(res["old_rating"])) ? '-' : Math.ceil(res["old_rating"]) ?? 0,
-        新分数: Math.ceil(res["new_rating"]) ?? 0,
-        分数差: Math.ceil(res["delta_rating"]) ?? 0,
-      };
+        let info = {
+            用户名: username,
+            排名: res["rank"] ?? 1000000,
+            分数: Math.ceil(res["score"]) ?? 0,
+            旧分数: (Math.ceil(res["oldRating"]) != 0 ? Math.ceil(res["oldRating"]) : Math.ceil(res["score"])),
+            新分数: (Math.ceil(res["newRating"]) != 0 ? Math.ceil(res["newRating"]) : Math.ceil(res["score"])),
+            分数差: Math.ceil(res["deltaRating"]) ?? 0,
+        };
 
-      await sleep(20);
-      let record = await queryRating(user);
-      let userContestRanking = Math.ceil(
-        record?.data?.userContestRanking && record.data.userContestRanking["rating"] ? record.data.userContestRanking["rating"] : 0
-      );
-      let userContestRankingHistory = record.data.userContestRankingHistory;
-      if (info["旧分数"] <= 10 || info["旧分数"] == "-") {
-        info["旧分数"] = "-";
-        info["新分数"] = "-";
-        info["分数差"] = "-";
-      }
-      info["当前分数"] = userContestRanking;
+        await sleep(20);
+        let record = await queryRating(user);
+        let userContestRanking = Math.ceil(
+            record?.data?.userContestRanking && record.data.userContestRanking["rating"] ? record.data.userContestRanking["rating"] : 0
+        );
+        let userContestRankingHistory = record.data.userContestRankingHistory;
+        if (info["旧分数"] <= 10 || info["旧分数"] == "-") {
+            info["旧分数"] = "-";
+            info["新分数"] = "-";
+            info["分数差"] = "-";
+        }
+        info["当前分数"] = userContestRanking;
 
-      infos.push(info);
+        infos.push(info);
+        }
+        infos.sort((x, y) =>
+        x["排名"] == y["排名"]
+            ? y["当前分数"] - x["当前分数"]
+            : x["排名"] - y["排名"]
+        );
+
+        for (let i = 0; i < infos.length; i++) {
+        if (infos[i]["排名"] == inf) {
+            infos[i]["排名"] = "-";
+        }
+        }
+        console.log("\x1b[36m\x1b[1m\x1b[4m%s\x1b[0m", "分数预测情况");
+
+        // console.log('\n分数预测情况\n')
+
+        for(let i = 0;i < infos.length;i++) {
+            if(infos[i]['新分数'] == 0) {
+                infos[i]['新分数'] = '-'
+            }
+            if(infos[i]['旧分数'] == 0) {
+                infos[i]['旧分数'] = '-'
+            }
+        }
+
+
+        console.table(infos, [
+        "排名",
+        "用户名",
+        "排名",
+        "当前分数",
+        // "旧分数",
+        "新分数",
+        "分数差",
+        ]);
     }
-    infos.sort((x, y) =>
-      x["排名"] == y["排名"]
-        ? y["当前分数"] - x["当前分数"]
-        : x["排名"] - y["排名"]
-    );
 
-    for (let i = 0; i < infos.length; i++) {
-      if (infos[i]["排名"] == inf) {
-        infos[i]["排名"] = "-";
-      }
-    }
-    console.log("\x1b[36m\x1b[1m\x1b[4m%s\x1b[0m", "分数预测情况");
-
-    // console.log('\n分数预测情况\n')
-
-
-    console.table(infos, [
-      "排名",
-      "用户名",
-      "排名",
-      "当前分数",
-      "旧分数",
-      "新分数",
-      "分数差",
-    ]);
-  }
-
-  await sendEmail()
-  return 100000
+    await sendEmail()
+    return 100000
 }
 
 async function run() {
