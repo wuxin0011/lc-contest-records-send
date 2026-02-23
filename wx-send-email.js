@@ -765,14 +765,7 @@ async function start() {
     for (let user of queryUserNames) {
         await sleep(50);
         let res = await query(user, queryWeekID);
-        // console.log(res)
-        if(!res || !res?.items){
-        continue
-        }
-        res = res['items']
-        if(!(Array.isArray(res) && res.length > 0)) {
-        continue;
-        }
+        res = (res && res?.items) ? res['items'] : []
         let username = get_username(user)
         let empty = {
             用户名: username,
@@ -829,13 +822,16 @@ async function start() {
         // console.log('\n分数预测情况\n')
 
         for(let i = 0;i < infos.length;i++) {
+            if(infos[i]['当前分数'] == 0) {
+              infos[i]['当前分数'] = '-'
+            }
             if(infos[i]['新分数'] == 0) {
-                infos[i]['新分数'] = '-'
+              infos[i]['新分数'] = '-'
             }
-            if(infos[i]['旧分数'] == 0) {
-                infos[i]['旧分数'] = '-'
+            if(infos[i]['分数差'] == 0) {
+              infos[i]['分数差'] = '-'
             }
-        }
+          }
 
 
         console.table(infos, [
